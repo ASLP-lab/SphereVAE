@@ -1,4 +1,4 @@
-# Sphere_VAE
+# SphereVAE: Hyperspherical Latent Autoencoders for Robust Autoregressive Speech Representation Modeling
 
 Training and inference code for Sphere_VAE, an audio variational
 autoencoder with a Power-spherical posterior. This repository contains only
