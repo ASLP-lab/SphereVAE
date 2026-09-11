@@ -1,25 +1,17 @@
-# SphereVAE: Hyperspherical Latent Autoencoders for Robust Autoregressive Speech Representation Modeling
+# SphereVAE
 
-Training and inference code for Sphere_VAE, an audio variational
-autoencoder with a Power-spherical posterior. This repository contains only
-the Sphere_VAE model and its required components. Model weights and datasets are not included.
+SphereVAE: Hyperspherical Latent Autoencoders for Robust Autoregressive Speech Representation Modeling
+
+![SphereVAE model architecture](docs/sphere_model_architecture.png)
+
+[arXiv](https://arxiv.org/pdf/2609.09903v1) · [Demo](https://haoyuzhang3.github.io/SphereVAE_Demo/) · [Hugging Face](https://huggingface.co/ASLP-lab/SphereVAE)
+
+
 
 ## Model
 
-The model uses a SEANet encoder, a causal Transformer, a 64-dimensional
-continuous spherical latent, a causal Transformer decoder, and a SEANet decoder.
-The encoder predicts a direction and concentration for the Power-spherical
-posterior. Samples are scaled to a sphere of radius `sqrt(64) = 8`.
-
-- Audio: 24 kHz, mono.
-- Encoder stride: `8 * 6 * 5 * 4 = 960` samples, giving 25 latent frames/s.
-- `encode(audio)` returns a sampled latent and the mean KL loss.
-- `encode_mu(audio)` returns the deterministic scaled direction.
-- `decode(latent)` reconstructs the waveform.
-
-The latent frame rate is determined by the audio sample rate divided by the
-SEANet encoder stride; there is no separate `frame_rate` configuration.
-The latent dimension is configured by `model.latent_dimension` (default: 64).
+SphereVAE combines a SEANet audio codec with causal Transformers and a
+Power-spherical latent space for robust speech representation modeling.
 
 ## Installation
 
@@ -39,58 +31,25 @@ accelerate config
 ## Training data
 
 Place a Kaldi-style SCP file at `data/train.scp`, or update
-`data.train_scp_path` in `configs/config_Sphere_VAE.yaml`. Each line may contain
-an utterance ID and an audio path:
+`data.train_scp_path` in `configs/config_Sphere_VAE.yaml`:
 
 ```text
 utt_0001 /path/to/audio_0001.flac
 utt_0002 /path/to/audio_0002.wav
 ```
 
-Single-path lines are also accepted; the filename stem is used as the
-utterance ID. Audio is resampled to mono 24 kHz, peak-normalized to 0.95, and
-fitted to 12-second training segments by cropping, padding, or repeating short
-samples.
+Each line contains an utterance ID and an audio path. Audio is processed as
+mono 24 kHz input and prepared as training segments by the dataset pipeline.
 
 ## Training
 
 ```bash
 CUDA_VISIBLE_DEVICES=0 accelerate launch train.py -c configs/config_Sphere_VAE.yaml
-# Multiple GPUs; configure the corresponding process count with Accelerate:
-CUDA_VISIBLE_DEVICES=0,1 accelerate launch train.py -c configs/config_Sphere_VAE.yaml
 ```
 
-Override the configuration with `CONFIG=path/to/config.yaml`. Checkpoints and
-TensorBoard logs are written to `train.save_dir`. Existing generator and
-discriminator checkpoints are loaded automatically when available.
-
-To initialize fine-tuning from a generator-only checkpoint, place it in the
-training directory using the `G_*.pth` naming convention:
-
-```bash
-mkdir -p exps/Sphere_VAE
-cp model_weights/G_500000_model_only.pth exps/Sphere_VAE/G_500000.pth
-```
-
-The training script first attempts to restore the complete generator and
-discriminator training state. If that is unavailable, it loads generator and
-discriminator weights only; a missing discriminator checkpoint is allowed and
-starts a fresh discriminator with `global_step=0`.
-
-The generator objective combines adversarial loss, feature matching (weight
-1.5), multi-scale Mel reconstruction (weight 15), and KL regularization (weight
-0.01). A multi-scale STFT discriminator provides the adversarial objective.
-
-### Existing training behavior
-
-This export preserves the Sphere_VAE training algorithm. In particular:
-
-- The loop updates optimizers every batch; the gradient accumulation setting
-  is not implemented as accumulation across batches.
-- `training_steps` controls the learning-rate scheduler, not the loop stop
-  condition. The loop is primarily bounded by `epochs`.
-- Optimizer betas and epsilon are specified in the training code.
-- `eval_interval` saves checkpoints; there is no held-out validation loop.
+Adjust training settings in `configs/config_Sphere_VAE.yaml`. Checkpoints and
+TensorBoard logs are written to the configured experiment directory. For
+multi-GPU training, configure Accelerate and set the visible devices as needed.
 
 ## Inference
 
@@ -119,6 +78,20 @@ configs/                Sphere_VAE configuration
 discriminators/         STFT discriminator
 losses/                 Spectral and adversarial losses
 utils/                  Configuration, checkpoints, and compilation utilities
+```
+
+## Citation
+
+```bibtex
+@misc{zhang2026spherevaehypersphericallatentautoencoders,
+  title={SphereVAE: Hyperspherical Latent Autoencoders for Robust Autoregressive Speech Representation Modeling},
+  author={Haoyu Zhang and Jingbin Hu and Hanke Xie and Qirui Zhan and Wenhao Li and Ziyu Zhang and Xiaming Ren and Yue Li and Xunyu Zhu and Zhipeng Chen and Lei Xie},
+  year={2026},
+  eprint={2609.09903},
+  archivePrefix={arXiv},
+  primaryClass={eess.AS},
+  url={https://arxiv.org/abs/2609.09903}
+}
 ```
 
 ## Acknowledgments
