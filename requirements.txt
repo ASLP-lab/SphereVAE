@@ -1,0 +1,20 @@
+# Core tensor and audio runtime. Install a build matching the target CUDA
+# driver when using a GPU; CPU-only PyTorch installations are also supported.
+torch==2.11.0
+torchaudio==2.11.0
+
+# Model, training, and data dependencies
+accelerate==1.13.0
+einops==0.8.2
+transformers==5.5.4
+numpy==1.26.4
+scipy==1.15.3
+PyYAML==6.0.3
+tqdm==4.67.3
+
+# Audio loading and writing
+librosa==0.11.0
+soundfile==0.13.1
+
+# TensorBoard logging used by train.py
+tensorboard==2.20.0

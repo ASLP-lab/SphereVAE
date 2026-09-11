@@ -1,0 +1,37 @@
+# Python and local environments
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+.cache/
+*.egg-info/
+build/
+dist/
+
+# Local credentials and agent settings
+.env
+.env.*
+!.env.example
+.agents/
+.codex/
+
+# Datasets, checkpoints, and experiment outputs
+data/
+exps/
+logs/
+output/
+outputs/
+*.pth
+*.pt
+*.ckpt
+*.safetensors
+*.tar
+*.tar.gz
+*.pkl
+*.wav
+*.mp3
+*.flac
+*.log
+events.out.tfevents.*
+.DS_Store
