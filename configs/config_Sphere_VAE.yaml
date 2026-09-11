@@ -16,7 +16,7 @@ data:
   hop_size: 300
   train_scp_path: ./data/train.scp
   segment_size: 288000
-  batch_size: 16
+  batch_size: 4
   devices: 1
   seed: 3333
   num_workers: 4
