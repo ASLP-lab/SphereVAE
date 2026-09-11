@@ -38,19 +38,19 @@ accelerate config
 
 ## Training data
 
-Place uncompressed TAR shards in `data/shards`, or update
-`data.train_shards_dir` in `configs/config_Sphere_VAE.yaml`.
-Each sample must contain matching entries:
+Place a Kaldi-style SCP file at `data/train.scp`, or update
+`data.train_scp_path` in `configs/config_Sphere_VAE.yaml`. Each line may contain
+an utterance ID and an audio path:
 
 ```text
-sample.mp3
-sample.json
+utt_0001 /path/to/audio_0001.flac
+utt_0002 /path/to/audio_0002.wav
 ```
 
-The JSON object may contain `id` and `text`. The loader caches TAR offsets in
-`index_cache.pkl`; remove that cache after moving or changing the shards.
-Audio is resampled to mono 24 kHz and fitted to 12-second training segments
-by cropping, padding, or repeating short samples.
+Single-path lines are also accepted; the filename stem is used as the
+utterance ID. Audio is resampled to mono 24 kHz, peak-normalized to 0.95, and
+fitted to 12-second training segments by cropping, padding, or repeating short
+samples.
 
 ## Training
 
@@ -114,7 +114,7 @@ models/model_Sphere_VAE.py  Sphere_VAE model and builder
 modules/                SEANet, Transformer, spherical distribution, utilities
 train.py                  Training entrypoint
 infer.py                  Audio reconstruction entrypoint
-dataset.py              TAR shard dataset
+dataset.py              SCP-listed audio dataset
 configs/                Sphere_VAE configuration
 discriminators/         STFT discriminator
 losses/                 Spectral and adversarial losses

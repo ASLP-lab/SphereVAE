@@ -14,7 +14,7 @@ train:
 data:
   sample_rate: &sample_rate 24000
   hop_size: 300
-  train_shards_dir: ./data/shards
+  train_scp_path: ./data/train.scp
   segment_size: 288000
   batch_size: 16
   devices: 1
@@ -71,4 +71,3 @@ model:
     activation_params: {negative_slope: 0.3}
   msspec:
     sample_rate: *sample_rate
-

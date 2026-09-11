@@ -15,7 +15,7 @@ from accelerate import DistributedDataParallelKwargs
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
-from dataset import Mp3TarOffsetDataset
+from dataset import ScpAudioDataset
 from models.model_Sphere_VAE import build_model
 from losses import MultiScaleMelSpectrogramLoss
 from losses import generator_loss, feature_loss, discriminator_loss
@@ -54,8 +54,8 @@ def collate_fn(batch):
     }
 
 
-def create_dataloader(base_path, batch_size, num_workers, dataset_name, sr, segment_size, seed_value=42):
-    dataset = Mp3TarOffsetDataset(base_path, sr, segment_size, seed_value=seed_value)
+def create_dataloader(scp_path, batch_size, num_workers, sr, segment_size, seed_value=42):
+    dataset = ScpAudioDataset(scp_path, sr, segment_size, seed_value=seed_value)
 
 
     loader = DataLoader(
@@ -237,30 +237,10 @@ def run(accelerator: accelerate.Accelerator, hps: utils.HParams):
             print("No compatible discriminator checkpoint; using a fresh discriminator.")
 
 
-    cache_path = os.path.join(hps.data.train_shards_dir, "index_cache.pkl")
-
-
-    if accelerator.is_main_process:
-        if not os.path.exists(cache_path):
-            print("Rank 0: Cache not found. Starting scan...")
-
-
-            _ = Mp3TarOffsetDataset(
-                hps.data.train_shards_dir,
-                sr=hps.data.sample_rate,
-                segment_size=hps.data.segment_size,
-                seed_value=hps.data.seed,
-            )
-        else:
-            print("Rank 0: Cache already exists.")
-            
-    accelerator.wait_for_everyone()
-
     train_loader = create_dataloader(
-        hps.data.train_shards_dir,
+        hps.data.train_scp_path,
         batch_size=hps.data.batch_size,
         num_workers=hps.data.num_workers,
-        dataset_name="emilia",
         sr=hps.data.sample_rate,
         segment_size=hps.data.segment_size,
         seed_value=hps.data.seed

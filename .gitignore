@@ -18,6 +18,7 @@ dist/
 
 # Datasets, checkpoints, and experiment outputs
 data/
+codes/
 exps/
 logs/
 output/
